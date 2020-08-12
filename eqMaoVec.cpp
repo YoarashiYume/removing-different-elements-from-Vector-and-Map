@@ -1,9 +1,8 @@
 ﻿#include <iostream>
 #include <vector>
 #include <map>
-#include <chrono>
 #include <algorithm>
-#include <random>
+#include "Randomizer.h"
 #define DEBUG
 void showСontainers(const std::vector<short> & v, const std::map<short, short>& m)
 {
@@ -15,15 +14,14 @@ void showСontainers(const std::vector<short> & v, const std::map<short, short>&
         std::cout << element.second << " ";
     std::cout << std::endl << std::endl;
 }
-void fillСontainers(std::vector<short>& v, std::map<short, short>& m,const int SIZE, std::random_device & rd)
+void fillСontainers(std::vector<short>& v, std::map<short, short>& m,const int SIZE, Randomizer & rd)
 {
-    /*just fill containers*/
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distFill(0, 9);
+   
+    rd.setRange(0, 9);
     for (size_t i = 0; i < SIZE; ++i)
     {
-        v.push_back(distFill(gen));
-        m.emplace(i, distFill(gen));
+        v.push_back(rd.getRandomValue());
+        m.emplace(i, rd.getRandomValue());
     }
 }
 int main(int argc, char* argv[])
@@ -33,38 +31,34 @@ int main(int argc, char* argv[])
         std::cout << "Only one argument\n";
         return -1;
     }
-    std::random_device rd;
-    const int SIZE = std::atoi(argv[1]);
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distRemove(0, SIZE > 15 ? 15 : SIZE-1);
-    const short DELETE_FROM_VECTOR = distRemove(gen);
-    const short DELETE_FROM_MAP = distRemove(gen);
+    Randomizer random;
+    const unsigned int SIZE = std::atoi(argv[1]);
+    random.setRange(0, SIZE > 15 ? 15 : SIZE - 1);
+    const unsigned int DELETE_FROM_VECTOR = random.getRandomValue();
+    const unsigned int DELETE_FROM_MAP = random.getRandomValue();
     std::vector<short> v;
     std::map<short, short> m;
-    fillСontainers(v, m, SIZE,rd);
+    fillСontainers(v, m, SIZE, random);
 #ifdef DEBUG
     std::cout << "filled containers\n";
 #endif
     showСontainers(v, m);
-    for (size_t i = 0; ; i++)
-    {
-        /*removing random elements*/
+    /*removing random elements*/  
+    for (size_t i = 0; DELETE_FROM_VECTOR != i; ++i)
         if (DELETE_FROM_VECTOR > i)
         {
-            std::uniform_int_distribution<> removingElement(0, v.size()-1);
-            v.erase(v.begin() + removingElement(gen));
+            random.setRange(0, v.size() - 1);
+            v.erase(v.begin() + random.getRandomValue());
         }
+    for (size_t i = 0; DELETE_FROM_MAP != i; ++i)
         if (DELETE_FROM_MAP > i)
         {
-            std::uniform_int_distribution<> removingElement(0, m.size() - 1);
-            m.erase(removingElement(gen));
+            random.setRange(0, m.size() - 1);
+            m.erase(random.getRandomValue());
         }
-        if (DELETE_FROM_VECTOR <= i && DELETE_FROM_MAP <= i)
-            break;
-    }
 #ifdef DEBUG
     std::cout << "will remove " << DELETE_FROM_VECTOR << " from vector\n";
-    std::cout << "will remove " << DELETE_FROM_MAP << " from map\n";
+    std::cout << "will remove " << DELETE_FROM_MAP << " from map\n\n";
     std::cout << "containers after removing random elements\n";
     showСontainers(v, m);
 #endif
