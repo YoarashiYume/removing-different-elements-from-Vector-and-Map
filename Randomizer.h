@@ -16,6 +16,5 @@ public:
 	Randomizer(int from_, int to_);
 	int getRandomValue();
 	void setRange(int from_,int to_);
-	template <typename T>
 };
 #endif
